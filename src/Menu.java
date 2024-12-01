@@ -51,12 +51,18 @@ public class Menu {
 }
 
 class Customer extends Menu {
-    JButton customerButton;
-    JButton submitButton;
     private Timer timer;
-    private int waitingTime;
+    //추가 변수
+    private int x, y, width, height;
+    private Emotion emotion;
 
-    public Customer() {
+    public Customer(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.emotion = new Emotion();
+
         ingredients = new Ingredient[8];
         luttuce = new Lettuce();    ingredients[0] = luttuce;
         tomato = new Tomato();      ingredients[1] = tomato;
@@ -72,58 +78,37 @@ class Customer extends Menu {
         // 대기 시간 초기화
         restartWaitingTime();
     }
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public Emotion getEmotion() { return emotion; }
 
     public void randomOrder() {
         Random random = new Random();
         for (Ingredient ingredient : ingredients) {
             ingredient.setAdded(random.nextBoolean()); // 랜덤으로 추가 여부 설정
         }
-
-        if (customerButton != null) {
-            for (ActionListener listener : customerButton.getActionListeners())
-                customerButton.removeActionListener(listener);
-
-            customerButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showConfirmDialog(null, Customer.this.toString(), "주문서", JOptionPane.PLAIN_MESSAGE);
-                }
-            });
-        }
     }
-
+    // 10초마다 손님 게이지 상승
     public void restartWaitingTime() {
-        waitingTime = 0;
-        this.timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                waitingTime += 1;
-            }
+        this.timer = new Timer(10000, e -> {
+            emotion.plusGauge();
         });
         timer.start();
     }
 
-    public int getWaitingTime() { return waitingTime; }
-
-    // 클릭하면 손님의 주문서를 보여주는 손님 버튼을 리턴하는 메소드
-    public JButton getCustomerButton(int num) {
-        customerButton = new JButton(new ImageIcon("images/customer.png"));
-        customerButton.setBorderPainted(false);
-        customerButton.setContentAreaFilled(false);
-        customerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showConfirmDialog(null, Customer.this.toString(), "주문서", JOptionPane.PLAIN_MESSAGE);
-            }
-        });
-        return customerButton;
+    public void stopTimer() {
+        if (timer != null) timer.stop();
     }
 
-    // 해당 버튼의 위치를 설정하는 메소드
-    public void setCustomerButtonLocation(int x, int y) {
-        customerButton.setBounds(x, y, 150, 150);
+    public boolean isClicked(int x, int y) {
+        return x >= this.x && x <= this.x + width && y >= this.y && y <= this.y + height;
     }
 
+    public int getCondition() {
+        return emotion.getCurrentGauge();
+    }
     // 인자로 받은 사용자의 재료리스트가 주문서와 같은지 비교하는 메소드
     public boolean isUserCorrect(ArrayList<Ingredient> user) {
         for (Ingredient order : this.ingredients) {

@@ -8,11 +8,17 @@ class GamePanel extends JPanel {
     private ImageIcon background = new ImageIcon("images/background.png");
     private Menu menu;
     private Customer customers[];
-    private Emotion emotions[];
-    private JButton submitButtons[];
     private User user;
     private Point startdragged;
     private Ingredient draggedIngredient = null;
+    // 추가한 변수
+    private Timer customerGenerationTimer;
+    private Timer changeEmotionTimer;
+    private int customerCount = 0;
+    private boolean isDragging = false;
+    private ImageIcon hamburgerImage = new ImageIcon("images/hamburger.png");
+    private int hamburgerX = -1;
+    private int hamburgerY = -1;
 
     public GamePanel(InfoPanel infoPanel) {
         this.infoPanel = infoPanel;
@@ -21,47 +27,39 @@ class GamePanel extends JPanel {
         menu = new Menu();
         user = new User();
         customers = new Customer[3];
-        emotions = new Emotion[3];
-        submitButtons = new JButton[3];
 
-        for (int i = 0; i < 3; i++) {
-            customers[i] = new Customer();
-            JButton customerButton = customers[i].getCustomerButton(i);
-            submitButtons[i] = getSubmitButton(i);
-
-            emotions[i] = new Emotion(this);
-            int customerNumber = i;
-            Timer timer = new Timer(1000, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    emotions[customerNumber].checkTime(customers[customerNumber].getWaitingTime());
-                    repaint();
-                    // redface라면 평판 -20, customer과 face 갱신
-                    if (emotions[customerNumber].getGauge() >= 50) {
-                        infoPanel.minusRaputation(20);
+        // 수정한 내용
+        generateCustomer(0);
+        // 손님 생성 타이머
+        customerGenerationTimer = new Timer(10000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (customerCount < 3) {
+                    for (int i = 0; i < customers.length; i++) {
+                        if (customers[i] == null) {
+                            generateCustomer(i);
+                            break;
+                        }
                     }
                 }
-            });
-            timer.start();
-
-            switch (i) {
-                case 0:
-                    customers[i].setCustomerButtonLocation(100, 300);
-                    setSubmitButtonLocation(i, 140, 265);
-                    break;
-                case 1:
-                    customers[i].setCustomerButtonLocation(300, 300);
-                    setSubmitButtonLocation(i, 340, 265);
-                    break;
-                case 2:
-                    customers[i].setCustomerButtonLocation(500, 300);
-                    setSubmitButtonLocation(i, 540, 265);
-                    break;
             }
-            add(customerButton);
-            add(submitButtons[i]);
-            setSubmitButton(i);
-        }
+        });
+        customerGenerationTimer.start();
+
+        changeEmotionTimer = new Timer(1000, e -> {
+            for (int i = 0; i < customers.length; i++) {
+                if (customers[i] != null) {
+                    if (customers[i].getCondition() < 3)
+                        repaint();
+                    else { // 손님이 매우 화나서 가버린 상태일 때
+                        customers[i] = null;
+                        infoPanel.minusRaputation(20);
+                        continue;
+                    }
+                }
+            }
+        });
+        changeEmotionTimer.start();
 
         // 드래그 시작할 때 눌린 곳이 재료의 좌표가 맞는지 확인하여 드래그 중인 재료 설정
         addMouseListener(new MouseAdapter() {
@@ -87,6 +85,21 @@ class GamePanel extends JPanel {
                         draggedIngredient.setY(ingredient.getY() + offsetY);
                         break;
                     }
+
+                }
+                for (Customer customer : customers) {
+                    if (customer != null && customer.isClicked(e.getX(), e.getY())) {
+                        // 손님을 클릭했을 때 주문서 표시
+                        JOptionPane.showMessageDialog(null, customer.toString(), "주문서", JOptionPane.PLAIN_MESSAGE);
+                        break;
+                    }
+                }
+                // 제작 접시 범위 안에서 클릭했을 때 드래그 시작
+                if (e.getX() >= 370 && e.getX() <= 460 && e.getY() >= 105 && e.getY() <= 155) {
+                    isDragging = true;
+                    hamburgerX = e.getX();
+                    hamburgerY = e.getY();
+                    repaint();
                 }
             }
 
@@ -111,6 +124,35 @@ class GamePanel extends JPanel {
                     draggedIngredient = null;
                     repaint();
                 }
+
+                if (isDragging) {
+                    isDragging = false;
+
+                    // 손님 위치와 비교
+                    for (int i = 0; i < customers.length; i++) {
+                        Customer customer = customers[i];
+                        if (customer != null &&
+                                e.getX() >= customer.getX() && e.getX() <= customer.getX() + customer.getWidth() &&
+                                e.getY() >= customer.getY() && e.getY() <= customer.getY() + customer.getHeight()) {
+
+                            // 손님의 주문과 유저 재료 비교
+                            if (customer.isUserCorrect(user.addedIngredient)) {
+                                orderSuccess();
+                            } else {
+                                orderFailure();
+                            }
+                            // 손님 상태 초기화
+                            menu = new Menu();
+                            customers[i] = null;
+                            repaint();
+                            return;
+                        }
+                    }
+                    // 손님 위치가 아니면 햄버거 이미지를 초기화
+                    hamburgerX = -1;
+                    hamburgerY = -1;
+                    repaint();
+                }
             }
         });
 
@@ -129,8 +171,23 @@ class GamePanel extends JPanel {
                     startdragged = e.getPoint();
                     repaint();
                 }
+                if (isDragging) {
+                    // 드래그 도중 햄버거 이미지의 위치를 업데이트
+                    hamburgerX = e.getX();
+                    hamburgerY = e.getY();
+                    repaint();
+                }
             }
         });
+    }
+    public void generateCustomer(int index) {
+        int x = 100 + index * 200; // 예제 위치
+        int y = 300;
+        int width = 150;
+        int height = 150;
+
+        customers[index] = new Customer(x, y, width, height);
+        repaint();
     }
 
     @Override
@@ -141,44 +198,26 @@ class GamePanel extends JPanel {
             Ingredient ingredient = menu.ingredients[i];
             g.drawImage(ingredient.icon.getImage(), ingredient.getX(), ingredient.getY(), null);
         }
+
+        for (Customer customer : customers) {
+            if (customer != null) {
+                g.drawImage(new ImageIcon("images/customer.png").getImage(),
+                        customer.getX(), customer.getY(),
+                        customer.getWidth(), customer.getHeight(), this);
+
+                Emotion emotion = customer.getEmotion();
+                ImageIcon currentEmotion = emotion.getCurrentEmotion();
+                if (currentEmotion != null) {
+                    g.drawImage(currentEmotion.getImage(),
+                            customer.getX() + 54, customer.getY() - 35, 40, 40, this);
+                }
+            }
+        }
+
+        if (isDragging && hamburgerX != -1 && hamburgerY != -1) {
+            g.drawImage(hamburgerImage.getImage(), hamburgerX - 25, hamburgerY - 25, 50, 50, this);
+        }
     }
-
-    public JButton getSubmitButton(int i) {
-        JButton submitButton = new JButton(new ImageIcon("images/submit.png"));
-        submitButton.setBorderPainted(false);
-        submitButton.setContentAreaFilled(false);
-
-        return submitButton;
-    }
-    private void setSubmitButton(int i) {
-        // ActionListener 중복 방지: 기존 리스너 제거
-        for (ActionListener listener : submitButtons[i].getActionListeners())
-            submitButtons[i].removeActionListener(listener);
-
-        // 새 ActionListener 등록
-        submitButtons[i].addActionListener(e -> {
-            boolean isCompleted = customers[i].isUserCorrect(user.addedIngredient);
-
-            if (isCompleted) orderSuccess();
-            else orderFailure();
-
-            // 유저 상태 초기화
-            menu = new Menu();
-            user = new User();
-
-            // 고객 상태 초기화 및 UI 갱신
-            // 랜덤 주문과 고객 시간 갱신
-            customers[i].randomOrder();
-            customers[i].restartWaitingTime();
-            revalidate();
-            repaint();
-        });
-    }
-
-    public void setSubmitButtonLocation(int i, int x, int y) {
-        submitButtons[i].setBounds(x, y, 70, 70);
-    }
-
     private void orderSuccess() {
         JOptionPane.showMessageDialog(null,
                 "햄버거 제작 성공 \n 평판 +10",
