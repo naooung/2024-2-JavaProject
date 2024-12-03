@@ -28,7 +28,7 @@ class StartPanel extends JPanel {
                 // mainPanel로 전환
                 MainPanel mainPanel = new MainPanel(mainFrame);
                 mainFrame.addPanel(mainPanel, "MainPanel");
-                mainFrame.switchPanel("MainPanel");
+                mainFrame.changePanel("MainPanel");
             }
         });
 

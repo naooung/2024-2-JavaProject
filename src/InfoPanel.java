@@ -7,8 +7,8 @@ class InfoPanel extends JPanel {
     private int completedOrder = 0;
     private JLabel raputationLabel;
     private int raputation = 100;
-    private GameTime gameTime;
     private JLabel timerLabel;
+    GameTime gameTime;
 
     public InfoPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -27,11 +27,12 @@ class InfoPanel extends JPanel {
         westPanel.add(raputationLabel);
         this.add(westPanel, BorderLayout.WEST);
 
-        timerLabel = new JLabel("소요시간: 0초");
-        timerLabel.setFont(font);
+        timerLabel = new JLabel("00:00");
+        timerLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 30));
         timerLabel.setHorizontalAlignment(JLabel.CENTER);
         gameTime = new GameTime();
         gameTime.startTimer(timerLabel);
+        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         this.add(timerLabel, BorderLayout.CENTER);
 
         this.add(gameTime.getPauseButton(), BorderLayout.EAST);
@@ -45,6 +46,7 @@ class InfoPanel extends JPanel {
         }
     }
     public int getCompletedOrder() { return completedOrder; }
+
     public void plusRaputation(int n) {
         if (raputation + n <= 100) {
             this.raputation += n;
@@ -66,6 +68,6 @@ class InfoPanel extends JPanel {
         int finishTime = gameTime.finishTime();
         EndPanel endPanel = new EndPanel(mainFrame, n, finishTime);
         mainFrame.addPanel(endPanel, "EndPanel");
-        mainFrame.switchPanel("EndPanel");
+        mainFrame.changePanel("EndPanel");
     }
 }

@@ -14,11 +14,11 @@ class GameTime {
             public void actionPerformed(ActionEvent e) {
                 time++;
                 if (time < 60)
-                    timerLabel.setText("소요시간: " + time + "초");
+                    timerLabel.setText("00:" + time);
                 else {
                     int minutes = time / 60;
                     int seconds = time % 60;
-                    timerLabel.setText("소요시간: " + minutes + "분 " + seconds + "초");
+                    timerLabel.setText(minutes + ":" + seconds);
                 }
             }
         });
@@ -47,7 +47,7 @@ class GameTime {
         return pauseButton;
     }
 
-    public long getTime() {
+    public int getTime() {
         return time;
     }
 

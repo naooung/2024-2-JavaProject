@@ -1,5 +1,6 @@
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 import javax.swing.*;
 
@@ -55,8 +56,9 @@ class Customer extends Menu {
     //추가 변수
     private int x, y, width, height;
     private Emotion emotion;
+    private int level; // 조합 재료수를 결정할 때 필요한 변수, 총 3단계로 구성
 
-    public Customer(int x, int y, int width, int height) {
+    public Customer(int x, int y, int width, int height, int level) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -85,9 +87,18 @@ class Customer extends Menu {
     public Emotion getEmotion() { return emotion; }
 
     public void randomOrder() {
+        int ingredientNum;
+        if (level == 0) ingredientNum = 5;
+        else if (level == 1) ingredientNum = 7;
+        else ingredientNum = 9;
+
         Random random = new Random();
-        for (Ingredient ingredient : ingredients) {
-            ingredient.setAdded(random.nextBoolean()); // 랜덤으로 추가 여부 설정
+        HashSet<Integer> addingIngredient = new HashSet<>();
+        while (addingIngredient.size() < ingredientNum) {
+            addingIngredient.add(random.nextInt(ingredients.length));
+        }
+        for (int index : addingIngredient) {
+            ingredients[index].setAdded(true);
         }
     }
     // 10초마다 손님 게이지 상승

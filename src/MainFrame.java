@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
@@ -28,7 +27,7 @@ public class MainFrame extends JFrame {
         panel.add(newPanel, name);
     }
 
-    public void switchPanel(String name) {
+    public void changePanel(String name) {
         cardLayout.show(panel, name);
     }
 

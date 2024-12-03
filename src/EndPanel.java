@@ -41,7 +41,7 @@ class EndPanel extends JPanel {
         restartButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mainFrame.switchPanel("StartPanel");
+                mainFrame.changePanel("StartPanel");
             }
         });
         restartButton.setBounds(50, 380, 300, 40);
