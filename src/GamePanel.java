@@ -11,7 +11,7 @@ class GamePanel extends JPanel {
     private User user;
     private Point dragStart;
     private Ingredient draggedIngredient = null;
-    private Timer customerCreationTimer;
+    private Timer createCustomerTimer;
     private Timer changeConditionTimer;
     private int customerCount = 0;
     private boolean isHamburgerDragged = false;
@@ -19,6 +19,12 @@ class GamePanel extends JPanel {
     private int hamburgerX = -1;
     private int hamburgerY = -1;
     private int gameLevel = 0;
+    private Fly fly;
+    private Timer createFlyTimer;
+    private Timer moveFlyTimer;
+    private ImageIcon swatter = new ImageIcon("images/flyswatter.png");
+    private int swatterX, swatterY;
+    private boolean showSwatter = false;
 
     public GamePanel(InfoPanel infoPanel) {
         this.infoPanel = infoPanel;
@@ -28,26 +34,23 @@ class GamePanel extends JPanel {
         user = new User();
         customers = new Customer[3];
 
-        // 수정한 내용
+        // 10초마다 손님을 생성하는 타이머
         createCustomer(0);
-        // 손님 생성 타이머
-        customerCreationTimer = new Timer(10000, new ActionListener() {
+        createCustomerTimer = new Timer(10000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (customerCount < 3) {
-                    for (int i = 0; i < customers.length; i++) {
+                if (customerCount < 3)
+                    for (int i = 0; i < customers.length; i++)
                         if (customers[i] == null) {
                             createCustomer(i);
                             break;
                         }
-                    }
-                }
             }
         });
-        customerCreationTimer.start();
+        createCustomerTimer.start();
 
+        // 1초마다 level 상승 조정하고 손님의 상태를 갱신하는 타이머
         changeConditionTimer = new Timer(1000, e -> {
-            // 1분마다 level 상승 조정
             if (infoPanel.gameTime.getTime() % 60 == 0) {
                 gameLevel++;
             }
@@ -65,6 +68,31 @@ class GamePanel extends JPanel {
             }
         });
         changeConditionTimer.start();
+
+        // 1분마다 파리를 생성하는 타이머
+        createFlyTimer = new Timer(60000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fly = new Fly();
+            }
+        });
+        createFlyTimer.start();
+
+        // 파리객체의 움직임 타이머
+        moveFlyTimer = new Timer(50, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fly != null && fly.isArrived()) {
+                    JOptionPane.showMessageDialog(null,
+                            "파리로 인한 손님의 컴플레인이 들어왔습니다. \n 평판 -10",
+                            "파리", JOptionPane.ERROR_MESSAGE);
+                    infoPanel.minusRaputation(10);
+                    fly = null;
+                } else if (fly != null)
+                    repaint();
+            }
+        });
+        moveFlyTimer.start();
 
         // 드래그 시작할 때 눌린 곳이 재료의 좌표가 맞는지 확인하여 드래그 중인 재료 설정
         addMouseListener(new MouseAdapter() {
@@ -103,6 +131,24 @@ class GamePanel extends JPanel {
                     hamburgerX = e.getX();
                     hamburgerY = e.getY();
                     repaint();
+                }
+
+                if (fly != null && fly.isClicked(e.getX(), e.getY())) {
+                    swatterX = e.getX();
+                    swatterY = e.getY();
+                    showSwatter = true;
+
+                    // 일정 시간 후 파리채 숨기기
+                    Timer swatterTimer = new Timer(150, event -> showSwatter = false);
+                    swatterTimer.setRepeats(false);
+                    swatterTimer.start();
+
+                    fly = null; // 파리 제거
+                    repaint();
+                    JOptionPane.showMessageDialog(null,
+                            "파리를 잡았습니다. \n 평판 +10",
+                            "파리", JOptionPane.PLAIN_MESSAGE);
+                    infoPanel.plusRaputation(10);
                 }
             }
 
@@ -175,7 +221,6 @@ class GamePanel extends JPanel {
                     repaint();
                 }
                 if (isHamburgerDragged) {
-                    // 드래그 도중 햄버거 이미지의 위치를 업데이트
                     hamburgerX = e.getX();
                     hamburgerY = e.getY();
                     repaint();
@@ -196,6 +241,7 @@ class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         g.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), this);
         for (int i = 0; i < menu.ingredients.length; i++) {
             Ingredient ingredient = menu.ingredients[i];
@@ -220,7 +266,14 @@ class GamePanel extends JPanel {
         if (isHamburgerDragged && hamburgerX != -1 && hamburgerY != -1) {
             g.drawImage(hamburgerImage.getImage(), hamburgerX - 25, hamburgerY - 25, 50, 50, this);
         }
+
+        if (fly != null)
+            fly.drawFly(g);
+        if (showSwatter) {
+            g.drawImage(swatter.getImage(), swatterX - 30, swatterY - 30, 60, 60, null);
+        }
     }
+
     private void orderSuccess() {
         JOptionPane.showMessageDialog(null,
                 "햄버거 제작 성공 \n 평판 +10",

@@ -101,9 +101,9 @@ class Customer extends Menu {
             ingredients[index].setAdded(true);
         }
     }
-    // 10초마다 손님 게이지 상승
+    // 20초마다 손님 게이지 상승
     public void restartWaitingTime() {
-        this.timer = new Timer(10000, e -> {
+        this.timer = new Timer(20000, e -> {
             emotion.plusGauge();
         });
         timer.start();

@@ -22,12 +22,12 @@ class InfoPanel extends JPanel {
         completedOrderLabel = new JLabel("완성한 주문: " + completedOrder + " / 10");
         completedOrderLabel.setFont(font);
         westPanel.add(completedOrderLabel);
-        raputationLabel = new JLabel("평판: " + raputation + " / 100");
+        raputationLabel = new JLabel("평판: " + raputation + " / 200");
         raputationLabel.setFont(font);
         westPanel.add(raputationLabel);
         this.add(westPanel, BorderLayout.WEST);
 
-        timerLabel = new JLabel("00:00");
+        timerLabel = new JLabel("0초");
         timerLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 30));
         timerLabel.setHorizontalAlignment(JLabel.CENTER);
         gameTime = new GameTime();
@@ -48,15 +48,15 @@ class InfoPanel extends JPanel {
     public int getCompletedOrder() { return completedOrder; }
 
     public void plusRaputation(int n) {
-        if (raputation + n <= 100) {
+        if (raputation + n <= 200) {
             this.raputation += n;
-            raputationLabel.setText("평판: " + raputation + " / 100");
+            raputationLabel.setText("평판: " + raputation + " / 200");
         }
     }
     public void minusRaputation(int n) {
         if (raputation - n > 0) {
             this.raputation -= n;
-            raputationLabel.setText("평판: " + raputation + " / 100");
+            raputationLabel.setText("평판: " + raputation + " / 200");
         }
         else if (raputation - n <= 0) {
             endGame(0); // GAME OVER 처리

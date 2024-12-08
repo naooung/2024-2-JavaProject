@@ -14,11 +14,11 @@ class GameTime {
             public void actionPerformed(ActionEvent e) {
                 time++;
                 if (time < 60)
-                    timerLabel.setText("00:" + time);
+                    timerLabel.setText(time + "초");
                 else {
                     int minutes = time / 60;
                     int seconds = time % 60;
-                    timerLabel.setText(minutes + ":" + seconds);
+                    timerLabel.setText(minutes + "분 " + seconds + "초");
                 }
             }
         });
