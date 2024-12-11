@@ -13,7 +13,6 @@ class GamePanel extends JPanel {
     private Ingredient draggedIngredient = null;
     private Timer createCustomerTimer;
     private Timer changeConditionTimer;
-    private int customerCount = 0;
     private boolean isHamburgerDragged = false;
     private ImageIcon hamburgerImage = new ImageIcon("images/hamburger.png");
     private int hamburgerX = -1;
@@ -25,6 +24,13 @@ class GamePanel extends JPanel {
     private ImageIcon swatter = new ImageIcon("images/flyswatter.png");
     private int swatterX, swatterY;
     private boolean showSwatter = false;
+    private ImageIcon pickleSlice = new ImageIcon("images/pickleslice.png");
+    private int lettuceCount = 5;
+    private int tomatoCount = 5;
+    private int cheeseCount = 5;
+    private int onionCount = 5;
+    private int pattyCount = 5;
+
 
     public GamePanel(InfoPanel infoPanel) {
         this.infoPanel = infoPanel;
@@ -34,12 +40,45 @@ class GamePanel extends JPanel {
         user = new User();
         customers = new Customer[3];
 
+        JButton storageButton = new JButton(new ImageIcon("images/storage.png"));
+        storageButton.setBorderPainted(false);
+        storageButton.setContentAreaFilled(false);
+        storageButton.setBounds(650, 5, 100, 100);
+        storageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JCheckBox lettuceBox = new JCheckBox("양상추");
+                JCheckBox tomatoBox = new JCheckBox("토마토");
+                JCheckBox cheeseBox = new JCheckBox("치즈");
+                JCheckBox onionBox = new JCheckBox("양파");
+                JCheckBox pattyBox = new JCheckBox("고기패티");
+
+                Object[] message = {"리필할 재료를 선택하세요:",
+                        lettuceBox, tomatoBox, cheeseBox, onionBox, pattyBox};
+
+                int option = JOptionPane.showConfirmDialog(null,
+                        message, "창고 이동", JOptionPane.OK_CANCEL_OPTION);
+
+                if (option == JOptionPane.OK_OPTION) {
+                    ArrayList<Ingredient> selectedIngredients = new ArrayList<>();
+                    if (lettuceBox.isSelected()) selectedIngredients.add(new Lettuce());
+                    if (tomatoBox.isSelected()) selectedIngredients.add(new Tomato());
+                    if (cheeseBox.isSelected()) selectedIngredients.add(new Cheese());
+                    if (onionBox.isSelected()) selectedIngredients.add(new Onion());
+                    if (pattyBox.isSelected()) selectedIngredients.add(new Patty());
+
+                    MiniGameFrame miniGameFrame = new MiniGameFrame(GamePanel.this, selectedIngredients);
+                    miniGameFrame.setVisible(true);
+                }
+            }
+        });
+        this.add(storageButton);
+
         // 10초마다 손님을 생성하는 타이머
         createCustomer(0);
         createCustomerTimer = new Timer(10000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (customerCount < 3)
                     for (int i = 0; i < customers.length; i++)
                         if (customers[i] == null) {
                             createCustomer(i);
@@ -69,8 +108,8 @@ class GamePanel extends JPanel {
         });
         changeConditionTimer.start();
 
-        // 1분마다 파리를 생성하는 타이머
-        createFlyTimer = new Timer(60000, new ActionListener() {
+        // 40초마다 파리를 생성하는 타이머
+        createFlyTimer = new Timer(40000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fly = new Fly();
@@ -169,7 +208,6 @@ class GamePanel extends JPanel {
                         menu.ingredients = ingredientList.toArray(new Ingredient[0]);
                     } else // 아니라면 원래 위치로 이동
                         draggedIngredient.setOriginXY();
-
                     draggedIngredient = null;
                     repaint();
                 }
@@ -228,6 +266,7 @@ class GamePanel extends JPanel {
             }
         });
     }
+
     public void createCustomer(int index) {
         int x = 100 + index * 200;
         int y = 300;
@@ -241,14 +280,27 @@ class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         g.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), this);
-        for (int i = 0; i < menu.ingredients.length; i++) {
-            Ingredient ingredient = menu.ingredients[i];
-            g.drawImage(ingredient.icon.getImage(), ingredient.getX(), ingredient.getY(), null);
+        // 모든 재료 그리기 (드래그 중인 재료는 제외)
+        for (Ingredient ingredient : menu.ingredients) {
+            if (ingredient != draggedIngredient) {
+                g.drawImage(ingredient.getIcon().getImage(), ingredient.getX(), ingredient.getY(), null);
+            }
         }
 
-        for (Customer customer : customers) {
+        // 드래그 중인 재료 그리기
+        if (draggedIngredient != null) {
+            if (draggedIngredient.getName().equals("피클")) {
+                // 피클인 경우 pickleslice.png 사용
+                g.drawImage(pickleSlice.getImage(), draggedIngredient.getX(), draggedIngredient.getY(), null);
+            } else {
+                // 다른 재료는 원래 아이콘 사용
+                g.drawImage(draggedIngredient.getIcon().getImage(), draggedIngredient.getX(), draggedIngredient.getY(), null);
+            }
+        }
+
+
+            for (Customer customer : customers) {
             if (customer != null) {
                 g.drawImage(new ImageIcon("images/customer.png").getImage(),
                         customer.getX(), customer.getY(),
@@ -269,9 +321,8 @@ class GamePanel extends JPanel {
 
         if (fly != null)
             fly.drawFly(g);
-        if (showSwatter) {
+        if (showSwatter)
             g.drawImage(swatter.getImage(), swatterX - 30, swatterY - 30, 60, 60, null);
-        }
     }
 
     private void orderSuccess() {
@@ -287,5 +338,27 @@ class GamePanel extends JPanel {
                 "잘못된 햄버거입니다! \n 평판 -10",
                 "실패", JOptionPane.ERROR_MESSAGE);
         infoPanel.minusRaputation(10);
+    }
+
+    public void useIngredient(Ingredient i) {
+        switch (i.getName()) {
+            case "양상추": lettuceCount--; break;
+            case "토마토": tomatoCount--; break;
+            case "치즈": cheeseCount--; break;
+            case "양파": onionCount--; break;
+            case "고기패티": pattyCount--; break;
+        }
+    }
+
+    public void refillIngredient(ArrayList<Ingredient> collectedIngredient) {
+        for (Ingredient i : collectedIngredient) {
+            switch (i.getName()) {
+                case "양상추": lettuceCount++; break;
+                case "토마토": tomatoCount++; break;
+                case "치즈": cheeseCount++; break;
+                case "양파": onionCount++; break;
+                case "고기패티": pattyCount++; break;
+            }
+        }
     }
 }

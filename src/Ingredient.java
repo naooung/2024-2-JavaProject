@@ -23,6 +23,7 @@ public class Ingredient {
     public int getX() { return x; }
     public int getY() { return y; }
     public ImageIcon getIcon() { return icon; }
+    public String toString() { return name; }
 
     @Override // 객체의 주소값 뿐만 아니라 이름으로도 비교하기 위해서 생성한 메소드
     public boolean equals(Object object) {
@@ -111,4 +112,5 @@ class Pickle extends Ingredient {
     }
     @Override
     public void setOriginXY() { this.x = 620; this.y = 160; }
+    public void setIcon(ImageIcon icon) {this.icon = icon;};
 }
