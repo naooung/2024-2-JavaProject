@@ -34,7 +34,7 @@ public class MiniGameFrame extends JFrame {
         this.add(mazePanel, BorderLayout.CENTER);
     }
 
-    public void plusIngredient(Ingredient ingredient) { // 나중에 gamePanel의 값을 증가로 변경
+    public void plusIngredient(Ingredient ingredient) { // 나중에 gamePanel의 값을 증가로 변경 필요
         collectedIngredient.add(ingredient);
 
         ingredientLabel.setText("획득한 재료: " + collectedIngredient.toString());
@@ -195,6 +195,7 @@ class MazePanel extends JPanel {
         }
 
         g.drawImage(home.getImage(), blockSize, blockSize, blockSize, blockSize, this);
+
         // 재료 그리기
         for (int i = 0; i < randomIngredient.length; i++) {
             Ingredient ingredient = randomIngredient[i];
