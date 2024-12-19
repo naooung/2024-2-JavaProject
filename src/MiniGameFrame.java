@@ -2,8 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class MiniGameFrame extends JFrame {
     GamePanel gamePanel;
@@ -47,25 +46,25 @@ public class MiniGameFrame extends JFrame {
 }
 
 class MazePanel extends JPanel {
-    MiniGameFrame miniGameFrame;
-    private int mazeSize = 19;
-    private int blockSize = 20;
+    private MiniGameFrame miniGameFrame;
+    private final int mazeSize = 19;
+    private final int blockSize = 20;
     private int[][] maze = new int[mazeSize][mazeSize];
-    ArrayList<Ingredient> neededIngredient; // 사용자가 선택한 재료
-    Player player;
-    // randomIngredient와 ingredientLocation의 인덱스는 짝지어져 있음
-    Ingredient randomIngredient[] = new Ingredient[10];
-    ArrayList<Point> ingredientLocations = new ArrayList<>();
-    ImageIcon home = new ImageIcon("images/restaurant.png");
+    private Player player;
+    private Map<Point, Ingredient> ingredientMap = new HashMap<>();
+    private ImageIcon home = new ImageIcon("images/restaurant.png");
+    private ArrayList<Ingredient> neededIngredient;
+
     public MazePanel(MiniGameFrame miniGameFrame, ArrayList<Ingredient> neededIngredient) {
         this.miniGameFrame = miniGameFrame;
         this.neededIngredient = neededIngredient;
 
-        createMaze(); // dfs 미로 생성 함수
-        createRandomIngredient(); // 재료 생성 함수
+        createMaze();           // DFS를 이용한 미로 생성
+        createRandomIngredients(); // 무작위 재료 배치
 
         player = new Player();
-        addKeyListener(new KeyAdapter() { // 키보드를 눌렀을 플레이어의 이동을 처리하는 함수
+
+        addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 int playerX = player.getX();
@@ -73,44 +72,48 @@ class MazePanel extends JPanel {
 
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_UP:
-                        if (possibleToMove(playerX, playerY - 1)) player.setY(playerY - 1); break;
+                        if (possibleToMove(playerX, playerY - 1)) player.setY(playerY - 1);
+                        break;
                     case KeyEvent.VK_DOWN:
-                        if (possibleToMove(playerX, playerY + 1)) player.setY(playerY + 1); break;
+                        if (possibleToMove(playerX, playerY + 1)) player.setY(playerY + 1);
+                        break;
                     case KeyEvent.VK_LEFT:
-                        if (possibleToMove(playerX - 1, playerY)) player.setX(playerX - 1); break;
+                        if (possibleToMove(playerX - 1, playerY)) player.setX(playerX - 1);
+                        break;
                     case KeyEvent.VK_RIGHT:
-                        if (possibleToMove(playerX + 1, playerY)) player.setX(playerX + 1); break;
+                        if (possibleToMove(playerX + 1, playerY)) player.setX(playerX + 1);
+                        break;
                 }
-                checkIngredient(); // 재료와 충돌했는지 확인하는 함수
-                checkHome(); // 다시 도착지에 도착했는지 확인하는 함수
+                checkIngredient();
+                checkHome();
                 repaint();
             }
         });
+
         setFocusable(true);
         requestFocusInWindow();
     }
+
     public boolean possibleToMove(int x, int y) {
-        // 캐릭터의 이동 위치가 프레임 범위를 넘어가지 않고 벽이 아닌지 확인하는 함수
         return x > 0 && y > 0 && x < mazeSize && y < mazeSize && maze[y][x] == 0;
     }
 
-    public void createMaze() {
+    private void createMaze() {
         for (int i = 0; i < mazeSize; i++) {
             for (int j = 0; j < mazeSize; j++) {
                 maze[i][j] = 1;
             }
         }
-        maze[2][1] = 0; //처음 시작 장소
-        dfs(1, 1); // 레스토랑 위치
+        maze[2][1] = 0; // 시작 위치
+        dfs(1, 1);
     }
+
     private void dfs(int x, int y) {
         maze[y][x] = 0;
-
         int[][] directions = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}};
-
         Random random = new Random();
 
-        // 방향을 무작위로 섞기
+        // 방향 무작위 섞기
         for (int i = 0; i < directions.length; i++) {
             int randomIndex = random.nextInt(directions.length);
             int[] temp = directions[i];
@@ -129,57 +132,50 @@ class MazePanel extends JPanel {
         }
     }
 
-    public void createRandomIngredient() {
+    private void createRandomIngredients() {
         Random random = new Random();
         int totalIngredients = 10;
-        int ingredientCount = 0;
+        ingredientMap.clear();
 
-        while (ingredientCount < totalIngredients) {
-            int x = random.nextInt(mazeSize / 2) * 2 + 1;
-            int y = random.nextInt(mazeSize / 2) * 2 + 1;
-            Point newPoint = new Point(x, y);
+        // 필요한 재료가 10개보다 적으면 반복해서 채우기
+        int neededSize = neededIngredient.size();
+        Ingredient[] selectedIngredients = new Ingredient[totalIngredients];
+        for (int i = 0; i < totalIngredients; i++) {
+            selectedIngredients[i] = neededIngredient.get(i % neededSize);
+        }
 
-            // 중복 위치 확인 및 미로의 통로 확인
-            if (maze[y][x] == 0 && !ingredientLocations.contains(newPoint)) {
-                Ingredient ingredient = neededIngredient.get(random.nextInt(neededIngredient.size()));
-                ingredient.setX(x);
-                ingredient.setY(y);
-                randomIngredient[ingredientCount] = ingredient;
+        // 중복되지 않는 위치에 재료 배치
+        for (Ingredient ingredient : selectedIngredients) {
+            while (true) {
+                int x = random.nextInt(mazeSize / 2) * 2 + 1;
+                int y = random.nextInt(mazeSize / 2) * 2 + 1;
+                Point point = new Point(x, y);
 
-                // 위치 저장
-                ingredientLocations.add(newPoint);
-                ingredientCount++;
+                if (maze[y][x] == 0 && !ingredientMap.containsKey(point)) {
+                    ingredient.setX(x);
+                    ingredient.setY(y);
+                    ingredientMap.put(point, ingredient);
+                    break;
+                }
             }
         }
     }
 
-    public void checkIngredient() {
-        int playerX = player.getX();
-        int playerY = player.getY();
-
-        for (int i = 0; i < ingredientLocations.size(); i++) {
-            Point p = ingredientLocations.get(i);
-
-            if (playerX == p.x && playerY == p.y) {
-                Ingredient ingredient = randomIngredient[i];
-                // 재료 수집 및 GamePanel에 반영
-                miniGameFrame.plusIngredient(ingredient);
-
-                // 제거 대신 가상의 위치로 좌표 변경
-                ingredient.setX(-1);
-                ingredient.setY(-1);
-                ingredientLocations.set(i, new Point(-1, -1));
-                break;
-            }
+    private void checkIngredient() {
+        Point playerPos = new Point(player.getX(), player.getY());
+        if (ingredientMap.containsKey(playerPos)) {
+            Ingredient ingredient = ingredientMap.get(playerPos);
+            miniGameFrame.plusIngredient(ingredient);
+            ingredientMap.remove(playerPos); // 재료 수집 후 제거
         }
     }
 
-    public void checkHome() {
-        if (player.getX() == 1 && player.getY() == 1)
+    private void checkHome() {
+        if (player.getX() == 1 && player.getY() == 1) {
             miniGameFrame.exitFrame();
+        }
     }
 
-    // 미로, 재료, 플레이어를 그리는 함수
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -188,7 +184,7 @@ class MazePanel extends JPanel {
         for (int y = 0; y < mazeSize; y++) {
             for (int x = 0; x < mazeSize; x++) {
                 if (maze[y][x] == 1) {
-                    g.setColor(Color.gray);
+                    g.setColor(Color.GRAY);
                     g.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
                 }
             }
@@ -197,11 +193,10 @@ class MazePanel extends JPanel {
         g.drawImage(home.getImage(), blockSize, blockSize, blockSize, blockSize, this);
 
         // 재료 그리기
-        for (int i = 0; i < randomIngredient.length; i++) {
-            Ingredient ingredient = randomIngredient[i];
-            if (ingredient != null) {
-                g.drawImage(ingredient.getIcon().getImage(), ingredient.getX() * blockSize, ingredient.getY() * blockSize, blockSize, blockSize, this);
-            }
+        for (Map.Entry<Point, Ingredient> entry : ingredientMap.entrySet()) {
+            Point point = entry.getKey();
+            Ingredient ingredient = entry.getValue();
+            g.drawImage(ingredient.getIcon().getImage(), point.x * blockSize, point.y * blockSize, blockSize, blockSize, this);
         }
 
         // 플레이어 그리기
