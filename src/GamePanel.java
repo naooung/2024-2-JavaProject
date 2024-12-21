@@ -203,6 +203,7 @@ class GamePanel extends JPanel {
                                 ingredientList.add(ingredient);
                             } else { // user에서 사용자가 추가한 재료 추가
                                 user.addedIngredient.add(draggedIngredient);
+                                useIngredient(draggedIngredient);
                             }
                         }
                         menu.ingredients = ingredientList.toArray(new Ingredient[0]);
@@ -286,6 +287,16 @@ class GamePanel extends JPanel {
             if (ingredient != draggedIngredient) {
                 g.drawImage(ingredient.getIcon().getImage(), ingredient.getX(), ingredient.getY(), null);
             }
+            String countText = "";
+            switch (ingredient.getName()) {
+                case "양상추": countText = lettuceCount + " / 5"; break;
+                case "토마토": countText = tomatoCount + " / 5"; break;
+                case "치즈": countText = cheeseCount + " / 5"; break;
+                case "양파": countText = onionCount + " / 5"; break;
+                case "고기패티": countText = pattyCount + " / 5"; break;
+            }
+            // 재료 아이콘 아래에 텍스트 그리기
+            g.drawString(countText, ingredient.getOriginX() + 10, ingredient.getOriginY() + ingredient.getIcon().getIconHeight() + 15);
         }
 
         // 드래그 중인 재료 그리기
@@ -298,7 +309,6 @@ class GamePanel extends JPanel {
                 g.drawImage(draggedIngredient.getIcon().getImage(), draggedIngredient.getX(), draggedIngredient.getY(), null);
             }
         }
-
 
             for (Customer customer : customers) {
             if (customer != null) {
@@ -323,6 +333,7 @@ class GamePanel extends JPanel {
             fly.drawFly(g);
         if (showSwatter)
             g.drawImage(swatter.getImage(), swatterX - 30, swatterY - 30, 60, 60, null);
+
     }
 
     private void orderSuccess() {
@@ -353,11 +364,11 @@ class GamePanel extends JPanel {
     public void refillIngredient(ArrayList<Ingredient> collectedIngredient) {
         for (Ingredient i : collectedIngredient) {
             switch (i.getName()) {
-                case "양상추": lettuceCount++; break;
-                case "토마토": tomatoCount++; break;
-                case "치즈": cheeseCount++; break;
-                case "양파": onionCount++; break;
-                case "고기패티": pattyCount++; break;
+                case "양상추": if (lettuceCount + 1 <= 5) lettuceCount++; break;
+                case "토마토": if (tomatoCount + 1 <= 5) tomatoCount++; break;
+                case "치즈": if (cheeseCount + 1 <= 5) cheeseCount++; break;
+                case "양파": if (onionCount + 1 <= 5) onionCount++; break;
+                case "고기패티": if (pattyCount + 1 <= 5) pattyCount++; break;
             }
         }
     }

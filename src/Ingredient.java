@@ -24,6 +24,8 @@ public class Ingredient {
     public int getY() { return y; }
     public ImageIcon getIcon() { return icon; }
     public String toString() { return name; }
+    public int getOriginX() { return 0; }
+    public int getOriginY() { return 0; }
 
     @Override // 객체의 주소값 뿐만 아니라 이름으로도 비교하기 위해서 생성한 메소드
     public boolean equals(Object object) {
@@ -41,7 +43,11 @@ class Lettuce extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 105; this.y = 170; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = getOriginY(); }
+    @Override
+    public int getOriginX() { return 105; }
+    @Override
+    public int getOriginY() { return 170; }
 }
 
 class Tomato extends Ingredient {
@@ -51,7 +57,11 @@ class Tomato extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 180; this.y = 170; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 180; }
+    @Override
+    public int getOriginY() { return 170; }
 }
 
 class Cheese extends Ingredient {
@@ -61,7 +71,11 @@ class Cheese extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 260; this.y = 170; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 260; }
+    @Override
+    public int getOriginY() { return 170; }
 }
 
 class Onion extends Ingredient {
@@ -71,7 +85,11 @@ class Onion extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 340; this.y = 170; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 340; }
+    @Override
+    public int getOriginY() { return 170; }
 }
 
 class Patty extends Ingredient {
@@ -81,7 +99,11 @@ class Patty extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 420; this.y = 170; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 420; }
+    @Override
+    public int getOriginY() { return 170; }
 }
 
 class Ketchup extends Ingredient {
@@ -91,7 +113,11 @@ class Ketchup extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 480; this.y = 158; }
+    public void setOriginXY() { this.x = getOriginX(); this.y = getOriginY(); }
+    @Override
+    public int getOriginX() { return 480; }
+    @Override
+    public int getOriginY() { return 158; }
 }
 
 class Mustard extends Ingredient {
@@ -101,7 +127,11 @@ class Mustard extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 550; this.y = 165; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 550; }
+    @Override
+    public int getOriginY() { return 165; }
 }
 
 class Pickle extends Ingredient {
@@ -111,6 +141,10 @@ class Pickle extends Ingredient {
         setOriginXY();
     }
     @Override
-    public void setOriginXY() { this.x = 620; this.y = 160; }
+    public void setOriginXY() { this.x = this.getOriginX(); this.y = this.getOriginY(); }
+    @Override
+    public int getOriginX() { return 620; }
+    @Override
+    public int getOriginY() { return 160; }
     public void setIcon(ImageIcon icon) {this.icon = icon;};
 }

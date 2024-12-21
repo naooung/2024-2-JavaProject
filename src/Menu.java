@@ -63,6 +63,7 @@ class Customer extends Menu {
         this.y = y;
         this.width = width;
         this.height = height;
+        this.level = level;
         this.emotion = new Emotion();
 
         ingredients = new Ingredient[8];
@@ -89,8 +90,8 @@ class Customer extends Menu {
     public void randomOrder() {
         int ingredientNum;
         if (level == 0) ingredientNum = 5;
-        else if (level == 1) ingredientNum = 7;
-        else ingredientNum = 9;
+        else if (level == 1) ingredientNum = 6;
+        else ingredientNum = 7;
 
         Random random = new Random();
         HashSet<Integer> addingIngredient = new HashSet<>();
