@@ -400,5 +400,6 @@ class GamePanel extends JPanel {
                 case "고기패티": if (pattyCount + 1 <= 5) pattyCount++; break;
             }
         }
+        resetMenu();
     }
 }
