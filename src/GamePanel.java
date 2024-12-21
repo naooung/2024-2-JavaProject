@@ -76,6 +76,8 @@ class GamePanel extends JPanel {
 
         // 10초마다 손님을 생성하는 타이머
         createCustomer(0);
+        createCustomer(1);
+        createCustomer(2);
         createCustomerTimer = new Timer(10000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,10 +100,9 @@ class GamePanel extends JPanel {
                 if (customers[i] != null) {
                     if (customers[i].getCondition() < 3)
                         repaint();
-                    else { // 손님이 매우 화나서 가버린 상태일 때
+                    else { // 손님이 화나서 가버린 상태
                         customers[i] = null;
                         infoPanel.minusRaputation(20);
-                        continue;
                     }
                 }
             }
@@ -230,7 +231,7 @@ class GamePanel extends JPanel {
                                 orderFailure();
                             }
                             // 손님 상태 초기화
-                            menu = new Menu();
+                            resetMenu();
                             customers[i] = null;
                             repaint();
                             return;
@@ -266,6 +267,34 @@ class GamePanel extends JPanel {
                 }
             }
         });
+    }
+
+    public void resetMenu() {
+        menu = new Menu();
+        ArrayList<Ingredient> resetIngredients = new ArrayList<>();
+
+        for (Ingredient ingredient : menu.ingredients) {
+            switch (ingredient.getName()) {
+                case "양상추":
+                    if (lettuceCount != 0) resetIngredients.add(ingredient);
+                    break;
+                case "토마토":
+                    if (tomatoCount != 0) resetIngredients.add(ingredient);
+                    break;
+                case "치즈":
+                    if (cheeseCount != 0) resetIngredients.add(ingredient);
+                    break;
+                case "양파":
+                    if (onionCount != 0) resetIngredients.add(ingredient);
+                    break;
+                case "고기패티":
+                    if (pattyCount != 0) resetIngredients.add(ingredient);
+                    break;
+                default:
+                    resetIngredients.add(ingredient);
+            }
+        }
+        menu.ingredients = resetIngredients.toArray(new Ingredient[0]);
     }
 
     public void createCustomer(int index) {
