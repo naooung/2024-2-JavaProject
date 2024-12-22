@@ -9,6 +9,7 @@ class InfoPanel extends JPanel {
     private int raputation = 100;
     private JLabel timerLabel;
     GameTime gameTime;
+    JLabel levelLabel;
 
     public InfoPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -19,28 +20,34 @@ class InfoPanel extends JPanel {
         JPanel westPanel = new JPanel();
         westPanel.setBackground(Color.WHITE);
         westPanel.setLayout(new GridLayout(2, 1));
-        completedOrderLabel = new JLabel("완성한 주문: " + completedOrder + " / 10");
+        completedOrderLabel = new JLabel("완성한 주문 " + completedOrder + " / 10");
         completedOrderLabel.setFont(font);
         westPanel.add(completedOrderLabel);
-        raputationLabel = new JLabel("평판: " + raputation + " / 200");
+        raputationLabel = new JLabel("평판 " + raputation + " / 200");
         raputationLabel.setFont(font);
         westPanel.add(raputationLabel);
         this.add(westPanel, BorderLayout.WEST);
 
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1));
+        centerPanel.setBackground(Color.WHITE);
+        levelLabel = new JLabel("LEVEL 1");
+        levelLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+        levelLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        centerPanel.add(levelLabel);
         timerLabel = new JLabel("0초");
-        timerLabel.setFont(new Font(Font.DIALOG, Font.BOLD, 30));
+        timerLabel.setFont(font);
         timerLabel.setHorizontalAlignment(JLabel.CENTER);
         gameTime = new GameTime();
         gameTime.startTimer(timerLabel);
-        timerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        this.add(timerLabel, BorderLayout.CENTER);
+        centerPanel.add(timerLabel);
+        this.add(centerPanel, BorderLayout.CENTER);
 
         this.add(gameTime.getPauseButton(), BorderLayout.EAST);
     }
 
     public void plusCompletedOrder() {
         completedOrder++;
-        completedOrderLabel.setText("완성한 주문: " + completedOrder + " / 10");
+        completedOrderLabel.setText("완성한 주문 " + completedOrder + " / 10");
         if (completedOrder == 10) {
             endGame(1); // 10개 완성시 GAME CLEAR 처리
         }
@@ -50,13 +57,13 @@ class InfoPanel extends JPanel {
     public void plusRaputation(int n) {
         if (raputation + n <= 200) {
             this.raputation += n;
-            raputationLabel.setText("평판: " + raputation + " / 200");
+            raputationLabel.setText("평판 " + raputation + " / 200");
         }
     }
     public void minusRaputation(int n) {
         if (raputation - n > 0) {
             this.raputation -= n;
-            raputationLabel.setText("평판: " + raputation + " / 200");
+            raputationLabel.setText("평판 " + raputation + " / 200");
         }
         else if (raputation - n <= 0) {
             endGame(0); // GAME OVER 처리

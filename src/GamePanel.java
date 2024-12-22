@@ -94,6 +94,7 @@ class GamePanel extends JPanel {
         changeConditionTimer = new Timer(1000, e -> {
             if (infoPanel.gameTime.getTime() % 60 == 0) {
                 gameLevel++;
+                infoPanel.levelLabel.setText("LEVEL " + (gameLevel+1));
             }
             // 손님 상태 갱신
             for (int i = 0; i < customers.length; i++) {
