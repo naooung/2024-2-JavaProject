@@ -81,11 +81,11 @@ class GamePanel extends JPanel {
         createCustomerTimer = new Timer(10000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                    for (int i = 0; i < customers.length; i++)
-                        if (customers[i] == null) {
-                            createCustomer(i);
-                            break;
-                        }
+                for (int i = 0; i < customers.length; i++)
+                    if (customers[i] == null) {
+                        createCustomer(i);
+                        break;
+                    }
             }
         });
         createCustomerTimer.start();
@@ -340,7 +340,7 @@ class GamePanel extends JPanel {
             }
         }
 
-            for (Customer customer : customers) {
+        for (Customer customer : customers) {
             if (customer != null) {
                 g.drawImage(new ImageIcon("images/customer.png").getImage(),
                         customer.getX(), customer.getY(),

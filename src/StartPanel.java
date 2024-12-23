@@ -35,7 +35,16 @@ class StartPanel extends JPanel {
         buttons[1].addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 도움말 OptionPane 생성
+                ImageIcon helpIcon = new ImageIcon("images/help.png");
+
+                // JOptionPane에 이미지 포함
+                JOptionPane.showMessageDialog(
+                        StartPanel.this,
+                        "",
+                        "햄버거 타이쿤 게임 방법",
+                        JOptionPane.INFORMATION_MESSAGE,
+                        helpIcon
+                );
             }
         });
 
