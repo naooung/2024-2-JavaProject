@@ -16,7 +16,7 @@ public class MiniGameFrame extends JFrame {
 
         setTitle("창고에서 필요한 재료를 가져오세요!");
         setSize(390, 440);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // 해당 프레임만 닫히게 설정
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // 이 frame만 닫히게 설정
         setLayout(new BorderLayout());
         Toolkit kit = Toolkit.getDefaultToolkit();
         Dimension screenSize = kit.getScreenSize();
@@ -33,7 +33,7 @@ public class MiniGameFrame extends JFrame {
         this.add(mazePanel, BorderLayout.CENTER);
     }
 
-    public void plusIngredient(Ingredient ingredient) { // 나중에 gamePanel의 값을 증가로 변경 필요
+    public void plusIngredient(Ingredient ingredient) {
         collectedIngredient.add(ingredient);
 
         ingredientLabel.setText("획득한 재료: " + collectedIngredient.toString());
@@ -59,8 +59,8 @@ class MazePanel extends JPanel {
         this.miniGameFrame = miniGameFrame;
         this.neededIngredient = neededIngredient;
 
-        createMaze();           // DFS를 이용한 미로 생성
-        createRandomIngredients(); // 무작위 재료 배치
+        createMaze();
+        createRandomIngredients();
 
         player = new Player();
 
@@ -70,7 +70,7 @@ class MazePanel extends JPanel {
                 int playerX = player.getX();
                 int playerY = player.getY();
 
-                switch (e.getKeyCode()) {
+                switch (e.getKeyCode()) { // 함수로 이동 가능한지 확인하고 이동 처리
                     case KeyEvent.VK_UP:
                         if (possibleToMove(playerX, playerY - 1)) player.setY(playerY - 1);
                         break;
@@ -94,7 +94,7 @@ class MazePanel extends JPanel {
         requestFocusInWindow();
     }
 
-    public boolean possibleToMove(int x, int y) {
+    public boolean possibleToMove(int x, int y) { // 범위 안인지랑 벽인지 확인
         return x > 0 && y > 0 && x < mazeSize && y < mazeSize && maze[y][x] == 0;
     }
 
@@ -104,7 +104,7 @@ class MazePanel extends JPanel {
                 maze[i][j] = 1;
             }
         }
-        maze[2][1] = 0; // 시작 위치
+        maze[2][1] = 0; // 플레이어 시작 위치
         dfs(1, 1);
     }
 
@@ -113,7 +113,6 @@ class MazePanel extends JPanel {
         int[][] directions = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}};
         Random random = new Random();
 
-        // 방향 무작위 섞기
         for (int i = 0; i < directions.length; i++) {
             int randomIndex = random.nextInt(directions.length);
             int[] temp = directions[i];
@@ -137,7 +136,7 @@ class MazePanel extends JPanel {
         int totalIngredients = 10;
         ingredientMap.clear();
 
-        // 필요한 재료가 10개보다 적으면 반복해서 채우기
+        // 필요한 재료가 10개보다 적으면 반복!!
         int neededSize = neededIngredient.size();
         Ingredient[] selectedIngredients = new Ingredient[totalIngredients];
         for (int i = 0; i < totalIngredients; i++) {
@@ -162,17 +161,17 @@ class MazePanel extends JPanel {
     }
 
     private void checkIngredient() {
-        Point playerPos = new Point(player.getX(), player.getY());
-        if (ingredientMap.containsKey(playerPos)) {
-            Ingredient ingredient = ingredientMap.get(playerPos);
+        Point playerLocation = new Point(player.getX(), player.getY());
+        if (ingredientMap.containsKey(playerLocation)) {
+            Ingredient ingredient = ingredientMap.get(playerLocation);
             miniGameFrame.plusIngredient(ingredient);
-            ingredientMap.remove(playerPos); // 재료 수집 후 제거
+            ingredientMap.remove(playerLocation); // map에서 제거해야 미로에 안그려짐
         }
     }
 
     private void checkHome() {
         if (player.getX() == 1 && player.getY() == 1) {
-            miniGameFrame.exitFrame();
+            miniGameFrame.exitFrame(); // 레스토랑에 도착하면 종료하고 결과 반영
         }
     }
 
@@ -193,9 +192,9 @@ class MazePanel extends JPanel {
         g.drawImage(home.getImage(), blockSize, blockSize, blockSize, blockSize, this);
 
         // 재료 그리기
-        for (Map.Entry<Point, Ingredient> entry : ingredientMap.entrySet()) {
-            Point point = entry.getKey();
-            Ingredient ingredient = entry.getValue();
+        for (Map.Entry<Point, Ingredient> map : ingredientMap.entrySet()) {
+            Point point = map.getKey();
+            Ingredient ingredient = map.getValue();
             g.drawImage(ingredient.getIcon().getImage(), point.x * blockSize, point.y * blockSize, blockSize, blockSize, this);
         }
 
@@ -204,7 +203,7 @@ class MazePanel extends JPanel {
     }
 }
 
- class Player {
+class Player {
     int x, y;
     ImageIcon playerImage = new ImageIcon("images/cart.png");
 
@@ -219,4 +218,4 @@ class MazePanel extends JPanel {
     }
     int getX() { return x; }
     int getY() { return y; }
- }
+}
